@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-datacenter
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  hostPath:
+    path: /mnt/security
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-datacenter
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-datacenter
+  labels:
+    pod: pod-datacenter
+spec:
+  volumes:
+    - name: storage-nautilus
+      persistentVolumeClaim:
+        claimName: pvc-datacenter
+  containers:
+    - name: container-datacenter
+      image: httpd:latest
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: storage-nautilus
+          mountPath: /var/www/html/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-datacenter 
+spec:
+  type: NodePort
+  selector:
+   pod: pod-datacenter
+  ports:
+      # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
+    - port: 80
+      targetPort: 80
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      nodePort: 30008
