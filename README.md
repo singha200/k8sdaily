@@ -1,2 +1,2 @@
 # k8sdaily
-Contains useful k8s files
+Useful k8s examples
